@@ -1,0 +1,60 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:latest'
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+  redis:
+    image: 'redis:latest'
+  nginx:
+    restart: always
+    depends_on:
+      - client
+      - api
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - "3050:80"
+  api:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./server # tells docker to look for the dockerfile in the server directory
+    restart: always
+    volumes:
+      - /app/node_modules # this is to prevent the node_modules from being overwritten by the host machine
+      - ./server:/app # this is for hot reloading
+    # Environment variables
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGHOST=postgres
+      - PGPORT=5432
+      - CHOKIDAR_USEPOLLING=true # Enable polling for Windows/WSL
+  client:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+    restart: always
+    volumes:
+      - /app/node_modules
+      - ./client:/app
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=0
+  worker:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    restart: always
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CHOKIDAR_USEPOLLING=true
