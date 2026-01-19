@@ -1,7 +1,6 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
 import OtherPage from "./OtherPage";
 import Fib from "./Fib";
 
@@ -9,24 +8,33 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p></p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          <Link to="/">Home</Link>
-          <Link to="/otherpage">Other Page</Link>
-        </header>
-        <div>
-          <Route exact path="/" component={Fib} />
-          <Route path="/otherpage" component={OtherPage} />
-        </div>
+        <nav className="navbar">
+          <NavLink to="/" className="nav-brand">
+            🚀 <span>ComputeHub</span>
+          </NavLink>
+          <div className="nav-links">
+            <NavLink exact to="/" className="nav-link" activeClassName="active">
+              Calculator
+            </NavLink>
+            <NavLink to="/otherpage" className="nav-link" activeClassName="active">
+              Documentation
+            </NavLink>
+          </div>
+        </nav>
+
+        <main className="app-container fade-in">
+          <header>
+            <h1 className="page-title">Multi-Container Hub</h1>
+            <p className="page-subtitle">
+              A high-performance distributed task engine powered by Docker, Redis, and Postgres.
+            </p>
+          </header>
+
+          <div className="content">
+            <Route exact path="/" component={Fib} />
+            <Route path="/otherpage" component={OtherPage} />
+          </div>
+        </main>
       </div>
     </Router>
   );
