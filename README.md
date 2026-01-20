@@ -1,4 +1,4 @@
-# 🚀 ComputeHub | Multi-Container Task Engine
+# ComputeHub | Multi-Container Hub
 
 ![Build Status](https://github.com/vikas9dev/multi-container-compute-hub/actions/workflows/deploy.yml/badge.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
@@ -14,9 +14,7 @@
 
 A high-performance, distributed system architecture for processing computational tasks at scale. ComputeHub demonstrates how to orchestrate a full-stack microservices environment using Docker, Redis for event-driven coordination, and Nginx for intelligent routing.
 
-## 🐳 Docker Hub Repositories
-
-Automated builds are pushed to Docker Hub via GitHub Actions.
+## Services
 
 | Service | Docker Hub Image | Description |
 | :--- | :--- | :--- |

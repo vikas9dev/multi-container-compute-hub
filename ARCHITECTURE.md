@@ -1,103 +1,125 @@
 # System Architecture Design
 
-ComputeHub follows a distributed microservices pattern, utilizing several industry-standard technologies to manage data flow and task processing.
+ComputeHub is a multi-container microservices demo with:
 
-## 📊 Data Flow Diagram
+- **Routing Nginx** as a single entry point
+- A **React client** (served by its own Nginx in production)
+- An **Express API**
+- A **worker** process for asynchronous computation
+- **Postgres** for persistence (history/audit log)
+- **Redis** for pub/sub + caching computed results
+
+This doc aligns with the project workflow:
+
+- **Local dev**: `docker-compose-dev.yml` (Redis+Postgres run as containers, app exposed on `localhost:3050`)
+- **Production (AWS)**: `docker-compose.yml` (pulls images from Docker Hub, uses RDS + ElastiCache)
+
+## Data flow (logical)
 
 ```mermaid
-graph LR
-    %% Node Definitions
-    User([User Browser])
-    Nginx[Nginx Router]
-    React[React Client]
-    API[Express API]
-    Postgres[(Postgres DB)]
-    Redis[Redis Pub/Sub]
-    Worker[NodeJS Worker]
-    RedisCache[Redis Cache]
+%%{init: {'theme': 'dark'}}%%
+graph TD
+    U[User Browser] --> RN[Routing Nginx]
 
-    %% Connections
-    User -- Port 3050 --> Nginx
-    
-    subgraph Frontend
-        Nginx -- "/" --> React
-    end
+    RN -->|root| CN[Client Nginx]
+    RN -->|api-rewrite| API[Express API]
 
-    subgraph Backend
-        Nginx -- "/api" --> API
-        API <--> Postgres
-        API -- "Publish" --> Redis
-    end
+    API -->|INSERT index| PG[Postgres]
+    API -->|HSET values placeholder| R[Redis]
+    API -->|PUBLISH insert| R
 
-    subgraph Compute
-        Redis -- "Notify" --> Worker
-        Worker -- "Result" --> RedisCache
-    end
+    R -->|SUBSCRIBE insert| W[Worker]
+    W -->|Compute fib| W
+    W -->|HSET values result| R
 
-    %% Dark Mode Optimized Styles
-    style User fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
-    style Nginx fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#fff
-    style React fill:#0f172a,stroke:#61dafb,stroke-width:2px,color:#61dafb
-    style API fill:#0f172a,stroke:#f97316,stroke-width:2px,color:#f97316
-    style Postgres fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
-    style Redis fill:#450a0a,stroke:#ef4444,stroke-width:2px,color:#fff
-    style Worker fill:#0f172a,stroke:#06b6d4,stroke-width:2px,color:#06b6d4
-    style RedisCache fill:#450a0a,stroke:#ef4444,stroke-width:2px,color:#fff
+    API -->|GET /values/current| R
+    API -->|GET /values/all| PG
+
+    style U fill:#222,stroke:#fff,stroke-width:2px,color:#fff
+    style RN fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style CN fill:#0f172a,stroke:#61dafb,stroke-width:2px,color:#fff
+    style API fill:#0f172a,stroke:#f97316,stroke-width:2px,color:#fff
+    style PG fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+    style R fill:#450a0a,stroke:#ef4444,stroke-width:2px,color:#fff
+    style W fill:#0f172a,stroke:#06b6d4,stroke-width:2px,color:#fff
 ```
 
-## 🧩 Component Roles
+## Deployment topology
 
-### 1. Nginx Gateway
-Acts as a Reverse Proxy. It is the single entry point for all traffic.
-- Routes `/` requests to the **React Client**.
-- Routes `/ws` requests (WebSockets) to the **React Client** for hot-reloading.
-- Routes `/api` requests to the **Express API** (after stripping the `/api` prefix).
+### Local development (Docker Compose)
 
-### 2. Express API
-The orchestrator of the system.
-- Receives numeric indexes for Fibonacci calculation.
-- Stores the request metadata in **PostgreSQL**.
-- Stores a temporary "Nothing yet!" placeholder in **Redis**.
-- Publishes an "insert" event to Redis to notify the Worker.
+- `nginx` exposes the app on **`localhost:3050`**
+- `postgres` and `redis` are local containers
+- `client`, `api`, and `worker` mount source code for hot reload (see `docker-compose-dev.yml`)
 
-### 3. Redis (Cache & Message Broker)
-Handles the asynchronous communication.
-- **Pub/Sub**: Facilitates the "fire and forget" communication between API and Worker.
-- **Cache**: Stores the final results of calculations, allowing for O(1) retrieval speed.
+### AWS (Elastic Beanstalk + managed services)
 
-### 4. Background Compute Worker
-A standalone Node.js process dedicated to logic execution.
-- Subscribed to Redis "insert" events.
-- Performs the actual Fibonacci calculation (recursive logic).
-- Stores the final result back in the Redis cache.
+- `docker-compose.yml` (production) runs **4 containers on the Beanstalk EC2 instance**:
+  - `nginx` (router)
+  - `client` (static build served by Nginx on port 3000 internally)
+  - `api`
+  - `worker`
+- Postgres runs on **RDS**
+- Redis runs on **ElastiCache (Redis OSS)**
 
-### 5. PostgreSQL
-Responsible for persistent, tabular data storage. 
-- Keeps a permanent record of all indexes that have ever been requested by users.
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+graph TD
+    Internet((Internet)) --> EB[Elastic Beanstalk Environment]
 
-## 🧠 Core Design Rationale
+    subgraph EB_EC2[Elastic Beanstalk EC2]
+      RN[Routing Nginx :80]
+      CN[Client Nginx :3000]
+      API[Express API :5000]
+      W[Worker]
+    end
 
-The architecture of ComputeHub is built on three fundamental engineering principles:
+    API --> RDS[(RDS Postgres :5432)]
+    API --> EC[(ElastiCache Redis :6379)]
+    W --> EC
 
-### 1. Persistent Audit vs. Volatile Cache
-The system separates data based on its importance and access frequency:
-- **PostgreSQL (Audit Log)**: Stores the user's input (the "Question") permanently. This acts as a reliable source of truth and an audit trail that survives container restarts or system crashes.
-- **Redis (Result Cache)**: Stores the computed values (the "Answer"). Since Fibonacci results are expensive to calculate but never change for a given index, they are cached in Redis for O(1) retrieval speed.
+    style Internet fill:#222,stroke:#fff,stroke-width:2px,color:#fff
+    style EB fill:#0f172a,stroke:#fff,stroke-width:2px,color:#fff
+    style RN fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style CN fill:#0f172a,stroke:#61dafb,stroke-width:2px,color:#fff
+    style API fill:#0f172a,stroke:#f97316,stroke-width:2px,color:#fff
+    style W fill:#0f172a,stroke:#06b6d4,stroke-width:2px,color:#fff
+    style RDS fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+    style EC fill:#450a0a,stroke:#ef4444,stroke-width:2px,color:#fff
+```
 
-### 2. Event-Driven Decoupling
-Rather than using a synchronous request-response cycle for heavy calculations, the system uses **Redis Pub/Sub**:
-- **Non-blocking API**: The API receives a request, logs the intent in Postgres, and "hands off" the task to Redis. It then immediately responds to the user, ensuring the web interface remains responsive.
-- **Resource Isolation**: The Worker process is completely decoupled. It can be scaled independently or even paused for maintenance without crashing the API or losing user requests.
+## Component roles (what each service does)
 
-### 3. Segregation of Responsibility
-This architecture demonstrates clear **Separation of Concerns**:
-- **The API** only handles validation, routing, and primary logging.
-- **The Worker** only handles computational logic.
-- **The Database** only handles permanent records.
-- **The Cache** handles high-speed result distribution.
+### Routing Nginx (`nginx`)
 
-## 🚀 Scalability Considerations
+- Routes `/` to the client container (static assets)
+- Routes `/api/*` to the API container after stripping `/api`
+- In development, also forwards `/ws` for the React dev server websocket
 
-- **Stateless API**: Multiple instances of the API can be started behind the Nginx load balancer.
-- **Horizontal Worker Scaling**: Since workers are decoupled via Redis, we can spin up 10+ worker containers to handle heavy computational loads without affecting the API's responsiveness.
-- **Dedicated Persistence**: Separating the cache (Redis) from the permanent store (Postgres) ensures high-speed data access for common requests while maintaining data integrity.
+### Express API (`server`)
+
+- Validates indexes (caps at 40)
+- Writes “history” to Postgres
+- Writes a placeholder (“Nothing yet!”) to Redis for immediate UI feedback
+- Publishes an `insert` event to Redis so the worker can compute the result
+
+### Worker (`worker`)
+
+- Subscribes to Redis channel `insert`
+- Computes Fibonacci value
+- Stores results back into Redis hash `values`
+
+### Redis (dev: container, prod: ElastiCache)
+
+- Pub/Sub event bus between API and Worker
+- Cache of computed results (`HSET values <index> <result>`)
+
+### Postgres (dev: container, prod: RDS)
+
+- Persistent audit log of submitted indexes
+
+## Operational notes (AWS)
+
+- **Security groups**: Beanstalk ↔ RDS ↔ ElastiCache communication is controlled by SG rules.
+  - Allow `5432` (Postgres) and `6379` (Redis) with **source = same SG**.
+- **ElastiCache transit encryption**: set to **Preferred** (this repo’s Redis client does not use TLS).
