@@ -45,6 +45,17 @@ jobs:
           docker push vikas9dev/computehub-server
           docker push vikas9dev/computehub-worker
 
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: multi-container-compute-hub
+          environment_name: Multi-container-compute-hub-env
+          version_label: ${{ github.sha }}
+          region: us-east-1
+          deployment_package: docker-compose.yml
+
       - name: Update Docker Hub Description (Client)
         uses: peter-evans/dockerhub-description@v3
         with:
