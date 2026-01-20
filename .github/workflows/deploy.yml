@@ -1,0 +1,15 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Test Image
+        run: docker build -t vikas9dev/react-test -f ./client/Dockerfile.dev ./client
+      - name: Run Tests
+        run: docker run -e CI=true vikas9dev/react-test npm test -- --coverage
