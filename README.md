@@ -1,5 +1,6 @@
 # 🚀 ComputeHub | Multi-Container Task Engine
 
+![Build Status](https://github.com/vikas9dev/multi-container-compute-hub/actions/workflows/deploy.yml/badge.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?logo=nginx&logoColor=white)
@@ -12,6 +13,17 @@
 ![ComputeHub Dashboard](assets/compute-hub-dashboard.png)
 
 A high-performance, distributed system architecture for processing computational tasks at scale. ComputeHub demonstrates how to orchestrate a full-stack microservices environment using Docker, Redis for event-driven coordination, and Nginx for intelligent routing.
+
+## 🐳 Docker Hub Repositories
+
+Automated builds are pushed to Docker Hub via GitHub Actions.
+
+| Service | Docker Hub Image | Description |
+| :--- | :--- | :--- |
+| **Client** | [`vikas9dev/computehub-client`](https://hub.docker.com/r/vikas9dev/computehub-client) | Frontend React Application (Nginx-served) |
+| **Server** | [`vikas9dev/computehub-server`](https://hub.docker.com/r/vikas9dev/computehub-server) | Backend Express API & Traffic Handler |
+| **Worker** | [`vikas9dev/computehub-worker`](https://hub.docker.com/r/vikas9dev/computehub-worker) | Background Task Processor (Fibonacci) |
+| **Nginx** | [`vikas9dev/computehub-nginx`](https://hub.docker.com/r/vikas9dev/computehub-nginx) | Primary Routing & Reverse Proxy |
 
 ## 🏗️ Architecture Overview
 
@@ -34,7 +46,7 @@ Detailed architecture information can be found in [ARCHITECTURE.md](./ARCHITECTU
 ### Run in Development
 1. Clone the repository:
    ```bash
-   git clone https://github.com/[your-username]/multi-container-compute-hub.git
+   git clone https://github.com/vikas9dev/multi-container-compute-hub.git
    cd multi-container-compute-hub
    ```
 2. Start the orchestration with Docker Compose:
@@ -49,6 +61,7 @@ Detailed architecture information can be found in [ARCHITECTURE.md](./ARCHITECTU
 - **Scalable Workers**: Add more compute power by scaling the worker service.
 - **Hot-Reloading Environment**: Seamless development with volume-mapped containers.
 - **Resilient Infrastructure**: Automatic service restarts and robust error handling.
+- **CI/CD Pipeline**: Fully automated testing and deployment workflow using GitHub Actions.
 
 ## 🛠️ Developed with
 - **Docker & Docker Compose** (Orchestration)
@@ -57,5 +70,6 @@ Detailed architecture information can be found in [ARCHITECTURE.md](./ARCHITECTU
 - **PostgreSQL** (Relational Database)
 - **Node.js / Express** (RESTful API)
 - **React** (Modern UI Hooks & Component Architecture)
+- **GitHub Actions** (CI/CD Automation)
 
 ---

@@ -31,3 +31,43 @@ jobs:
           docker push vikas9dev/computehub-nginx
           docker push vikas9dev/computehub-server
           docker push vikas9dev/computehub-worker
+
+      - name: Update Docker Hub Description (Client)
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-client
+          short-description: "Frontend Client for ComputeHub"
+          readme-filepath: ./README.md
+
+      - name: Update Docker Hub Description (Nginx)
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-nginx
+          short-description: "Routing Nginx for ComputeHub"
+          readme-filepath: ./README.md
+
+      - name: Update Docker Hub Description (Server)
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-server
+          short-description: "Backend API Server for ComputeHub"
+          readme-filepath: ./README.md
+
+      - name: Update Docker Hub Description (Worker)
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-worker
+          short-description: "Worker Service for ComputeHub"
+          readme-filepath: ./README.md
