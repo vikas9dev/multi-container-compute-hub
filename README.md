@@ -36,7 +36,7 @@ The system is built on a resilient, multi-container architecture designed for sc
 - **Compute Worker (Node.js)**: Dedicated service for heavy computational logic.
 - **Data Persistence (Postgres)**: Final storage for completed task history.
 
-Detailed architecture information can be found in [ARCHITECTURE.md](./ARCHITECTURE.md).
+Detailed architecture information can be found in [ARCHITECTURE.md](https://github.com/vikas9dev/multi-container-compute-hub/blob/main/ARCHITECTURE.md).
 
 ## ⚡ Quick Start
 
@@ -54,7 +54,7 @@ Detailed architecture information can be found in [ARCHITECTURE.md](./ARCHITECTU
    docker compose up --build
    ```
 3. Access the dashboard:
-   👉 **http://localhost:3050**
+   👉 **http://localhost:3000**
 
 ## 🔧 Features
 - **Event-Driven Workflow**: Real-time task queuing via Redis.
