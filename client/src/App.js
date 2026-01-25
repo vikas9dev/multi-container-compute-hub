@@ -16,7 +16,11 @@ function App() {
             <NavLink exact to="/" className="nav-link" activeClassName="active">
               Calculator
             </NavLink>
-            <NavLink to="/otherpage" className="nav-link" activeClassName="active">
+            <NavLink
+              to="/otherpage"
+              className="nav-link"
+              activeClassName="active"
+            >
               Documentation
             </NavLink>
           </div>
@@ -24,9 +28,10 @@ function App() {
 
         <main className="app-container fade-in">
           <header>
-            <h1 className="page-title">Multi-Container Hub</h1>
+            <h1 className="page-title">Multi-Container Hub - K8s</h1>
             <p className="page-subtitle">
-              A high-performance distributed task engine powered by Docker, Redis, and Postgres.
+              A high-performance distributed task engine powered by Docker,
+              Redis, and Postgres.
             </p>
           </header>
 
