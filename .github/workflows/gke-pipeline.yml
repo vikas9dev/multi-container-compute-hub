@@ -34,7 +34,7 @@ jobs:
       - name: Get GKE Credentials
         uses: 'google-github-actions/get-gke-credentials@v2'
         with:
-          cluster_name: multi-cluster
+          cluster_name: computehub-multi-k8s
           location: us-central1-a
       
       - name: Deploy to K8s
