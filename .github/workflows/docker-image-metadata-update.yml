@@ -1,0 +1,51 @@
+# Metadata Sync Pipeline (Triggered only on README changes)
+name: Docker Image Metadata Sync
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  update-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Update Client Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-client
+          short-description: "ComputeHub Frontend Client"
+          readme-filepath: ./README.md
+
+      - name: Update Nginx Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-nginx
+          short-description: "ComputeHub Routing Nginx"
+          readme-filepath: ./README.md
+
+      - name: Update Server Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-server
+          short-description: "ComputeHub Backend API"
+          readme-filepath: ./README.md
+
+      - name: Update Worker Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: vikas9dev/computehub-worker
+          short-description: "ComputeHub Worker Service"
+          readme-filepath: ./README.md

@@ -1,0 +1,51 @@
+# Reusable workflow for building and pushing Docker images
+name: Reusable Build and Push
+
+on:
+  workflow_call:
+    secrets:
+      DOCKER_HUB_USERNAME:
+        required: true
+      DOCKER_HUB_ACCESS_TOKEN:
+        required: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Test Image
+        run: docker build -t vikas9dev/react-test -f ./client/Dockerfile.dev ./client
+      - name: Run Tests
+        run: docker run -e CI=true vikas9dev/react-test npm test -- --coverage
+
+  build-and-push:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and Push Images
+        run: |
+          D_USER=vikas9dev
+          # Build and push with 'latest' and 'Git SHA' tags
+          docker build -t $D_USER/computehub-client:latest -t $D_USER/computehub-client:${{ github.sha }} ./client
+          docker build -t $D_USER/computehub-nginx:latest -t $D_USER/computehub-nginx:${{ github.sha }} ./nginx
+          docker build -t $D_USER/computehub-server:latest -t $D_USER/computehub-server:${{ github.sha }} ./server
+          docker build -t $D_USER/computehub-worker:latest -t $D_USER/computehub-worker:${{ github.sha }} ./worker
+          
+          docker push $D_USER/computehub-client:latest
+          docker push $D_USER/computehub-nginx:latest
+          docker push $D_USER/computehub-server:latest
+          docker push $D_USER/computehub-worker:latest
+
+          docker push $D_USER/computehub-client:${{ github.sha }}
+          docker push $D_USER/computehub-nginx:${{ github.sha }}
+          docker push $D_USER/computehub-server:${{ github.sha }}
+          docker push $D_USER/computehub-worker:${{ github.sha }}
