@@ -1,11 +1,11 @@
 version: '3'
 services:
   client:
-    image: 'vikas9dev/computehub-client'
+    image: 'vikas9dev/computehub-client:K8s-v1'
     mem_limit: 128m
     hostname: client
   api:
-    image: 'vikas9dev/computehub-server'
+    image: 'vikas9dev/computehub-server:K8s-v1'
     mem_limit: 128m
     hostname: api
     environment:
@@ -17,14 +17,14 @@ services:
       - PGPASSWORD=${PGPASSWORD}
       - PGPORT=${PGPORT}
   worker:
-    image: 'vikas9dev/computehub-worker'
+    image: 'vikas9dev/computehub-worker:K8s-v1'
     mem_limit: 128m
     hostname: worker
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
   nginx:
-    image: 'vikas9dev/computehub-nginx'
+    image: 'vikas9dev/computehub-nginx:K8s-v1'
     mem_limit: 128m
     hostname: nginx
     ports:
