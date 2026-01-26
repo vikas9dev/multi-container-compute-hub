@@ -14,10 +14,11 @@
 
 ## ✨ Live Demo
 
-> 🌐 **Live Site:** [https://computehub-k8s.vikas9dev.xyz/](https://computehub-k8s.vikas9dev.xyz/)  
-> *(Note: This site is part of a production deployment demonstration and may be taken down periodically to optimize compute costs.)*
+> 🌐 **Live Site:** [https://computehub-k8s.vikas9dev.xyz/](https://computehub-k8s.vikas9dev.xyz/ )  
+> 📁 **Source Code:** [https://github.com/vikas9dev/multi-container-compute-hub](https://github.com/vikas9dev/multi-container-compute-hub)  
+> *(Note: The live site is part of a production deployment demonstration and may be taken down periodically to optimize compute costs.)*
 
-![ComputeHub Dashboard](assets/compute-hub-dashboard.png)
+![ComputeHub Dashboard](https://raw.githubusercontent.com/vikas9dev/multi-container-compute-hub/refs/heads/main/assets/compute-hub-dashboard.png)
 
 A high-performance, distributed system architecture for processing computational tasks at scale. ComputeHub demonstrates how to orchestrate a full-stack microservices environment using **Kubernetes**, **Redis** for event-driven coordination, and a **Cloud Load Balancer (Ingress)** for intelligent routing.
 
