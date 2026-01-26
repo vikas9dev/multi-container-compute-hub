@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vikas9dev-com-tls
+spec:
+  secretName: vikas9dev-com
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: computehub-k8s.vikas9dev.xyz
+  dnsNames:
+    - computehub-k8s.vikas9dev.xyz
+    - www.computehub-k8s.vikas9dev.xyz
