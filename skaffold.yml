@@ -1,0 +1,20 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  local:
+    push: false
+  artifacts:
+    - image: vikas9dev/computehub-client
+      context: client
+      docker:
+        dockerfile: Dockerfile.dev
+      sync:
+        "**/*.js": .
+        "**/*.css": .
+        "**/*.html": .
+deploy:
+  kubectl:
+    manifests:
+      - k8s_dev/client-config.yml
+      - k8s_dev/server-config.yml
+      - k8s_dev/worker-deployment.yml
